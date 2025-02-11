@@ -1,30 +1,45 @@
-import React from 'react'
-import Category from './Sections/Category'
-import Types from './Sections/Types'
-import Services from './Sections/Services'
-import Header from './Sections/Header'
-import Hero from './Sections/Hero'
-import Reviews from './Sections/Reviews'
-import Footer from './Sections/Footer'
-import Productgrid from './Sections/ProductGrid'  // Replace with actual component name when available
-import Banner from './Sections/Banner'
-import Insta from './Sections/Insta'
+import React, { useState, useEffect } from "react";
+import MasterLayout from "./components/MasterLayout"; // Import Master Layout
+import LoginForm from "./components/LoginForm";
+import LogoutButton from "./components/LogoutButton";
+import RegisterForm from "./components/RegisterForm";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const App = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("auth_token");
+    if (token) {
+      setIsLoggedIn(true);
+    }
+  }, []);
+
   return (
     <>
-      <Header />
-      <Hero />
-      <Category />
-      <Types />
-      <Services />      
-      <Productgrid />
-      <Banner />
-      <Reviews />
-      <Insta />
-      <Footer />
-    </>
-  )
-}
+      <ToastContainer position="top-right" autoClose={3000} />
 
-export default App
+      {!isLoggedIn ? (
+        showRegister ? (
+          <RegisterForm setShowRegister={setShowRegister} />
+        ) : (
+          <LoginForm setIsLoggedIn={setIsLoggedIn} setShowRegister={setShowRegister} />
+        )
+      ) : (
+        <>
+          {/* Logout Button */}
+          <div className="flex justify-center p-4">
+            <LogoutButton setIsLoggedIn={setIsLoggedIn} />
+          </div>
+
+          {/* Use Master Layout */}
+          <MasterLayout />
+        </>
+      )}
+    </>
+  );
+};
+
+export default App;
