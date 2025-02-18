@@ -1,14 +1,25 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import "react-toastify/dist/ReactToastify.css";
 
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
-const LoginForm = ({ setIsLoggedIn, setShowRegister }) => {
+const LoginForm = ({ setIsLoggedIn }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate(); // Initialize useNavigate
+
+  useEffect(() => {
+    AOS.init({
+      offset: 100,
+      duration: 1000,
+      easing: "ease-in-out",
+    });
+    return () => AOS.refresh();
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -17,23 +28,26 @@ const LoginForm = ({ setIsLoggedIn, setShowRegister }) => {
         email,
         password,
       });
+
       // Save token to localStorage
       localStorage.setItem("auth_token", response.data.access_token);
-      const token = localStorage.getItem("auth_token"); // এখন token পাবে
-      console.log("Stored Token:", token);      
+      const token = localStorage.getItem("auth_token"); // Now token is stored
+      console.log("Stored Token:", token);
+
       // Show success toast notification
-      if(response.status === 200){
-        toast.success(response.data.message, {
-          position: "top-right",
-          autoClose: 1500,
-        });
-      }
+      toast.success(response.data.message || "Login successful!", {
+        position: "top-right",
+        autoClose: 1500,
+      });
+
       setTimeout(() => {
-        setIsLoggedIn(true)
-      }, 3000);;
+        setIsLoggedIn(true);
+        navigate("/"); // Redirect to Home Page after login
+      }, 2000);
+      
     } catch (err) {
       // Display error toast notification
-      if (err.response && err.response.data && err.response.data.message) {
+      if (err.response?.data?.message) {
         toast.error(err.response.data.message, {
           position: "top-right",
           autoClose: 3000,
@@ -46,14 +60,6 @@ const LoginForm = ({ setIsLoggedIn, setShowRegister }) => {
       }
     }
   };
-  useEffect(() => {
-    AOS.init({
-      offset: 100,
-      duration: 1000,
-      easing: "ease-in-out",
-    });
-    AOS.refresh();
-  })
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -110,7 +116,7 @@ const LoginForm = ({ setIsLoggedIn, setShowRegister }) => {
             Don't have an account?{" "}
             <button
               type="button"
-              onClick={() => setShowRegister(true)}
+              onClick={() => navigate("/register")} // Navigate to Register Page
               className="text-blue-500 hover:underline"
             >
               Register

@@ -1,17 +1,21 @@
 import React, { useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import AOS from "aos";
 import 'aos/dist/aos.css';
 
 const LogoutButton = ({ setIsLoggedIn }) => {
+  const navigate = useNavigate(); // Initialize useNavigate
+
   useEffect(() => {
     AOS.init({
       offset: 100,
       duration: 1000,
       easing: "ease-in-out",
     });
-    AOS.refresh();
-  })
+    return () => AOS.refresh();
+  }, []);
+
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("auth_token");
@@ -26,8 +30,13 @@ const LogoutButton = ({ setIsLoggedIn }) => {
         }
       );
 
-      localStorage.removeItem("auth_token"); // Remove token from storage
+      // Remove token from storage
+      localStorage.removeItem("auth_token");
       setIsLoggedIn(false);
+
+      // Redirect to login page after logout
+      navigate("/login");
+
     } catch (err) {
       console.error("Logout failed:", err);
     }
