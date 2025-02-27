@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate, useLocation } from "react-router-dom"; // Import useLocation
 import "react-toastify/dist/ReactToastify.css";
-
 import AOS from "aos";
 import "aos/dist/aos.css";
 
@@ -12,6 +11,7 @@ const AdminLoginForm = ({ setIsAdmin }) => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false); // Track the loading state
   const navigate = useNavigate(); // Initialize useNavigate
+  const location = useLocation(); // Track where the user came from
 
   useEffect(() => {
     AOS.init({
@@ -24,14 +24,6 @@ const AdminLoginForm = ({ setIsAdmin }) => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      toast.error("Please fill out all fields.", {
-        position: "top-right",
-        autoClose: 3000,
-      });
-      return;
-    }
-
     setLoading(true);
 
     try {
@@ -40,37 +32,38 @@ const AdminLoginForm = ({ setIsAdmin }) => {
         password,
       });
 
-      // Save token to localStorage
-      localStorage.setItem("admin_auth_token", response.data.admin_access_token);
+      const { admin_access_token, message, role } = response.data;
 
-      // Show success toast notification
-      toast.success(response.data.message || "Login successful!", {
+      // ✅ Update localStorage
+      localStorage.setItem("admin_auth_token", admin_access_token);
+      localStorage.setItem("admin_role", role || "admin");
+
+      // ✅ Update state immediately
+      setIsAdmin(true);
+
+      toast.success(message || "Login successful!", {
         position: "top-right",
         autoClose: 1500,
       });
 
       setTimeout(() => {
-        setIsAdmin(true);
-        navigate("/admin/dashboard"); // Redirect to Admin Dashboard after login
-      }, 2000);
-      
+        const redirectTo = location.state?.from?.pathname || "/admin/products";
+        navigate(redirectTo);
+      }, 1500);
+
     } catch (err) {
-      // Display error toast notification
-      const errorMessage =
-        err.response?.data?.message ||
-        "An unexpected error occurred. Please try again.";
-      toast.error(errorMessage, {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.error(
+        err.response?.data?.message || "An unexpected error occurred. Please try again.",
+        { position: "top-right", autoClose: 3000 }
+      );
     } finally {
-      setLoading(false); // Stop loading after the request
+      setLoading(false);
     }
   };
 
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      {/* Toast Container for notifications */}
       <ToastContainer />
 
       <form
@@ -93,7 +86,7 @@ const AdminLoginForm = ({ setIsAdmin }) => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-           
+            required
           />
         </div>
 
@@ -109,10 +102,11 @@ const AdminLoginForm = ({ setIsAdmin }) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-           
+            required
           />
         </div>
 
+        {/* Login Button */}
         <button
           type="submit"
           disabled={loading} // Disable the button when loading
@@ -121,12 +115,13 @@ const AdminLoginForm = ({ setIsAdmin }) => {
           {loading ? "Logging in..." : "Login"}
         </button>
 
+        {/* Register Link */}
         <div className="mt-4 text-center">
           <p className="text-sm text-gray-600">
             Don't have an account?{" "}
             <button
               type="button"
-              onClick={() => navigate("/admin/register")} // Navigate to Register Page
+              onClick={() => navigate("/admin/register")}
               className="text-blue-500 hover:underline"
             >
               Register

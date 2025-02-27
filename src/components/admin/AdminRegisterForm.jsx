@@ -13,12 +13,7 @@ const AdminRegisterForm = ({ setIsLoggedIn }) => {
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
-    e.preventDefault();
-
-    
-
-    
-
+    e.preventDefault();  
     setLoading(true);
 
     try {
