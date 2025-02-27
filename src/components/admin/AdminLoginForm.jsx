@@ -4,12 +4,13 @@ import { toast, ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import "react-toastify/dist/ReactToastify.css";
 
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import AOS from "aos";
+import "aos/dist/aos.css";
 
-const LoginForm = ({ setIsLoggedIn }) => {
+const AdminLoginForm = ({ setIsAdmin }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false); // Track the loading state
   const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
@@ -23,16 +24,24 @@ const LoginForm = ({ setIsLoggedIn }) => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    if (!email || !password) {
+      toast.error("Please fill out all fields.", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      const response = await axios.post("http://localhost:8000/api/login", {
+      const response = await axios.post("http://localhost:8000/api/admin/login", {
         email,
         password,
       });
 
       // Save token to localStorage
-      localStorage.setItem("auth_token", response.data.access_token);
-      const token = localStorage.getItem("auth_token"); // Now token is stored
-      console.log("Stored Token:", token);
+      localStorage.setItem("admin_auth_token", response.data.admin_access_token);
 
       // Show success toast notification
       toast.success(response.data.message || "Login successful!", {
@@ -41,23 +50,21 @@ const LoginForm = ({ setIsLoggedIn }) => {
       });
 
       setTimeout(() => {
-        setIsLoggedIn(true);
-        navigate("/"); // Redirect to Home Page after login
+        setIsAdmin(true);
+        navigate("/admin/dashboard"); // Redirect to Admin Dashboard after login
       }, 2000);
       
     } catch (err) {
       // Display error toast notification
-      if (err.response?.data?.message) {
-        toast.error(err.response.data.message, {
-          position: "top-right",
-          autoClose: 3000,
-        });
-      } else {
-        toast.error("An unexpected error occurred. Please try again.", {
-          position: "top-right",
-          autoClose: 3000,
-        });
-      }
+      const errorMessage =
+        err.response?.data?.message ||
+        "An unexpected error occurred. Please try again.";
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    } finally {
+      setLoading(false); // Stop loading after the request
     }
   };
 
@@ -72,7 +79,7 @@ const LoginForm = ({ setIsLoggedIn }) => {
         onSubmit={handleLogin}
         className="bg-white shadow-md rounded-lg p-8 w-full max-w-md"
       >
-        <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">Login</h2>
+        <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">Admin Login</h2>
 
         {/* Email Field */}
         <div className="mb-4">
@@ -86,6 +93,7 @@ const LoginForm = ({ setIsLoggedIn }) => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+           
           />
         </div>
 
@@ -101,14 +109,16 @@ const LoginForm = ({ setIsLoggedIn }) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+           
           />
         </div>
 
         <button
           type="submit"
+          disabled={loading} // Disable the button when loading
           className="w-full bg-blue-500 text-white py-2 px-4 rounded-md shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          Login
+          {loading ? "Logging in..." : "Login"}
         </button>
 
         <div className="mt-4 text-center">
@@ -116,7 +126,7 @@ const LoginForm = ({ setIsLoggedIn }) => {
             Don't have an account?{" "}
             <button
               type="button"
-              onClick={() => navigate("/register")} // Navigate to Register Page
+              onClick={() => navigate("/admin/register")} // Navigate to Register Page
               className="text-blue-500 hover:underline"
             >
               Register
@@ -128,4 +138,4 @@ const LoginForm = ({ setIsLoggedIn }) => {
   );
 };
 
-export default LoginForm;
+export default AdminLoginForm;

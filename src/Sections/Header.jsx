@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { FaSearch, FaUser, FaHeart, FaShoppingCart, FaBars, FaTimes, FaPhoneAlt, FaMapMarkerAlt, FaEnvelope } from "react-icons/fa";
 import { Link } from "react-scroll";
+import LogoutButton from "../components/frontend/LogoutButton";
 
-const Header = () => {
+const Header = ({setIsLoggedIn}) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -55,6 +56,8 @@ const Header = () => {
               {item.name}
             </Link>
           ))}
+          {/* Logout Option as List Item */}
+          <LogoutButton setIsLoggedIn={setIsLoggedIn} />
         </ul>
 
         {/* Icons for Desktop */}
