@@ -36,6 +36,7 @@ const Navbar = ({ setIsAdmin }) => {
         <div className="text-sm text-gray-700">
           <div className="font-medium">{admin.name}</div>
           <div className="text-xs">{admin.email}</div>
+          <div className="text-xs">{admin.role} Admin</div>
         </div>
       ) : (
         <div className="text-xs text-gray-500">Loading...</div>

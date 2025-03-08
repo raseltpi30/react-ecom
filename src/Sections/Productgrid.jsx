@@ -4,10 +4,12 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { MdStar, MdAddShoppingCart, MdOutlineRemoveRedEye } from 'react-icons/md';
 import { FaRegHeart, FaStar } from 'react-icons/fa';
+import { useNavigate } from "react-router-dom";
 
 const Productgrid = () => {
-  const [products, setProducts] = useState([]); // ✅ Store products in state
-  const [loading, setLoading] = useState(true); // ✅ Loading state
+  const [products, setProducts] = useState([]); 
+  const [loading, setLoading] = useState(true); 
+  const navigate = useNavigate(); // ✅ Use navigate for routing
 
   useEffect(() => {
     AOS.init({
@@ -17,17 +19,21 @@ const Productgrid = () => {
     });
     AOS.refresh();
 
-    // ✅ Fetch products from Laravel API
-    axios.get("http://localhost:8000/api/products")
+    axios.get("http://localhost:8000/api/user/products")
       .then(response => {
-        setProducts(response.data); // ✅ Store products in state
-        setLoading(false); // ✅ Stop loading
+        setProducts(response.data); 
+        setLoading(false); 
       })
       .catch(error => {
         console.error("Error fetching products:", error);
         setLoading(false);
       });
   }, []);
+
+  // ✅ Function to navigate to Product Details
+  const handleProductClick = (id) => {
+    navigate(`/product/${id}`);
+  };
 
   return (
     <div id="products" className="w-full lg:px-20 px-5 py-[80px] bg-gray-100 flex flex-col justify-center items-center gap-4">
@@ -38,25 +44,41 @@ const Productgrid = () => {
         Trending Products
       </h1>
 
-      {/* ✅ Show Loading State */}
       {loading ? (
         <p className="text-lg text-gray-600 font-semibold">Loading products...</p>
       ) : (
         <div data-aos="slide-up" data-aos-delay="300" className="w-full grid lg:grid-cols-4 grid-cols-1 justify-center items-center gap-10 mt-10">
           {products.map((product, index) => (
-            <div id='product-box' key={index} className="flex flex-col justify-center items-center gap-2 bg-white p-4 rounded-lg cursor-pointer relative">
-              <img src={product.img} alt={product.name} />
+            <div 
+              id='product-box' 
+              key={index} 
+              className="flex flex-col justify-center items-center gap-2 bg-white p-4 rounded-lg cursor-pointer relative"
+              onClick={() => handleProductClick(product.id)} // ✅ Clicking anywhere will navigate
+            >
+              <img src={product.img} alt={product.name} className='lg:h-[250px] h-[200px]' />
+
+              {/* ✅ Clickable Icons */}
               <div id="icons" className="flex justify-center items-center gap-3 absolute top-[20px]">
-                <div className="bg-themepurple hover:bg-themeyellow hover:text-black rounded-full p-3 text-white">
+                <div 
+                  className="bg-themepurple hover:bg-themeyellow hover:text-black rounded-full p-3 text-white"
+                  onClick={(e) => { e.stopPropagation(); handleProductClick(product.id); }} // ✅ Prevent Parent Click
+                >
                   <MdOutlineRemoveRedEye />
                 </div>
-                <div className="bg-themepurple hover:bg-themeyellow hover:text-black rounded-full p-3 text-white">
+                <div 
+                  className="bg-themepurple hover:bg-themeyellow hover:text-black rounded-full p-3 text-white"
+                  onClick={(e) => { e.stopPropagation(); console.log("Added to Wishlist:", product); }} 
+                >
                   <FaRegHeart />
                 </div>
-                <div className="bg-themepurple hover:bg-themeyellow hover:text-black rounded-full p-3 text-white">
+                <div 
+                  className="bg-themepurple hover:bg-themeyellow hover:text-black rounded-full p-3 text-white"
+                  onClick={(e) => { e.stopPropagation(); console.log("Added to Cart:", product); }} 
+                >
                   <MdAddShoppingCart />
                 </div>
               </div>
+
               <h1 className="text-lg text-gray-400 font-normal">{product.name}</h1>
               <h1 className="text-xl text-black font-semibold">{product.category}</h1>
               <h1 className="text-lg text-themepurple font-semibold">{product.price}</h1>

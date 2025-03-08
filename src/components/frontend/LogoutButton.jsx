@@ -16,9 +16,9 @@ const LogoutButton = ({ setIsLoggedIn }) => {
     }).then((result) => {
       if (result.isConfirmed) {
         localStorage.removeItem("user_auth_token");
-        setIsLoggedIn(false);
-        navigate("/login");
-        Swal.fire("Logged Out!", "You have been logged out successfully.", "success");
+        // setIsLoggedIn(false);
+        // navigate("/login");
+        // Swal.fire("Logged Out!", "You have been logged out successfully.", "success");
       }
     });
   };

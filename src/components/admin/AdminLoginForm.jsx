@@ -36,10 +36,7 @@ const AdminLoginForm = ({ setIsAdmin }) => {
 
       // ✅ Update localStorage
       localStorage.setItem("admin_auth_token", admin_access_token);
-      localStorage.setItem("admin_role", role || "admin");
-
-      // ✅ Update state immediately
-      setIsAdmin(true);
+      localStorage.setItem("role", role);
 
       toast.success(message || "Login successful!", {
         position: "top-right",
@@ -47,14 +44,15 @@ const AdminLoginForm = ({ setIsAdmin }) => {
       });
 
       setTimeout(() => {
+        setIsAdmin(true); // Update isAdmin state immediately
         const redirectTo = location.state?.from?.pathname || "/admin/products";
         navigate(redirectTo);
-      }, 1500);
+      }, 3000);
 
     } catch (err) {
       toast.error(
         err.response?.data?.message || "An unexpected error occurred. Please try again.",
-        { position: "top-right", autoClose: 3000 }
+        { position: "top-right", autoClose: 2000 }
       );
     } finally {
       setLoading(false);
